@@ -1,72 +1,80 @@
 import numpy as np
 import random
+from typing import List
+
+from genetic_algorithm import individual
+from genetic_algorithm import config
 
 
-def generate_initial_population(n: int):
-    population = [generate_indvidual() for i in range(n)]
+def sort_population(population: (np.ndarray, int)) -> (np.ndarray, int):
+    """
+    Sort the population by fitness value in descending order
+    :param population:
+    :return: sorted population
+    """
+    return sorted(population, key=lambda x: x.fitness, reverse=True)
+
+
+def generate_initial_population(population_size: int) -> List[(np.ndarray, int)]:
+    """
+
+    :param population_size: int
+    :return: population
+    """
+    population = [individual.generate_individual() for i in range(population_size)]
     return population
 
 
-def generate_indvidual():
-    rows = list(np.arange(8))
-    cols = list(np.arange(8))
-    individual = []
-    while rows and cols:
-        current_row = rows[random.randint(0, len(rows) - 1)]
-        current_col = cols[random.randint(0, len(cols) - 1)]
-        rows.remove(current_row)
-        cols.remove(current_col)
-        individual.append((current_row, current_col))
-    return np.array(individual)
-
-
-def compute_fitness(individual):
-    return None
-
-
-def compute_fitness_of_all():
-    return None
-
+def crossover(individual1, individual2):
+    pass
 
 def main():
-    number_of_organisms = 100
-
     # 1
     # generate initial population of N organisms randomly
     # but maybe with given conditions taken into account
     # i.e. one queen per row and one queen per column
     # one individual should probably look like
-    # I = [(0,0), (1,2), (2,1), ...,(7,7)] as numpy array: np.
-    population = generate_initial_population(number_of_organisms)
-
+    # Individual = ([(0,0), (1,2), (2,1), ...,(7,7)], fitness value) as numpy array: np.
     # 2
     # compute fitness of each individual
-    compute_fitness_of_all()
+    # population = individual.compute_fitness_of_all(population)
+    population = generate_initial_population(config.number_of_organisms)
 
-    # 3
-    # produce new generation by:
-    # 3.1.
-    # selecting two organisms from old generation for mating
-    # choose fitter ones, maybe not THE fittest
+    population = sort_population(population)
+    print(population)
 
-    # 3.2
-    # recombine genetic material with probability p_c, i.e. crossover
-    # mutate with very small probability
-    # create a pair of children
+    while population[0].fitness != 0:
+        # 3
+        # produce new generation by:
+        # 3.1.
+        # selecting two organisms from old generation for mating
+        # choose fitter ones, maybe not THE fittest
+        population2 = population.copy()
+        individual1 = population2[int(np.log(random.random(0, np.exp(config.field_size))))]
+        population2.remove(individual1)
+        individual2 = population2[int(np.log(random.random(0, np.exp(config.field_size - 1))))]
+        population2.remove(individual2)
 
-    # 3.3
-    # compute the fitness of children and insert into population
+        # 3.2
+        # recombine genetic material with probability p_c, i.e. crossover
+        # mutate with very small probability
+        # create a pair of children
 
-    # 3.4
-    # if the size of new population is smaller than the old one, repeat from 3.1 onwards
+        crossover(individual1, individual2)
 
-    # 4
-    # replace the old population with the new one
+        # 3.3
+        # compute the fitness of children and insert into population
 
-    # 5
-    # if satisfied with fittest individual -> finish
-    # if population converged, i.e. 95% of individuals are the same -> finish
-    # otherwise go to 3 and repeat
+        # 3.4
+        # if the size of new population is smaller than the old one, repeat from 3.1 onwards
+
+        # 4
+        # replace the old population with the new one
+
+        # 5
+        # if satisfied with fittest individual -> finish
+        # if population converged, i.e. 95% of individuals are the same -> finish
+        # otherwise go to 3 and repeat
 
 
 if __name__ == '__main__':
