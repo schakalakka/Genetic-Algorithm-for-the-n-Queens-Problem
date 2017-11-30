@@ -100,6 +100,29 @@ def compute_average_fitness(population):
     return sum([x.fitness for x in population]) / len(population)
 
 
+def choose_parents(population):
+    # compute accumulated fitnesses
+    accumulated_fitness_values = np.cumsum([x.fitness for x in population])
+    # choose between 0 and max(accumulated_fitness_values) = last element of
+    # list (because they were sorted beforehand)
+    R = np.random.randint(0, accumulated_fitness_values[-1], 2)
+    parent1 = population[next(i for i, acc_fitness in enumerate(accumulated_fitness_values) if acc_fitness >= R[0])]
+    parent2 = population[next(i for i, acc_fitness in enumerate(accumulated_fitness_values) if acc_fitness >= R[1])]
+    return parent1, parent2
+
+
+def choose_parents_fast(population):
+    """
+    !!!!!!!!DOES NOT WORK YET!!!!!!!!!
+    :param population:
+    :return:
+    """
+    parent1 = population[int(np.log(np.random.randint(0, np.exp(config.field_size))))]
+    parent2 = population[int(np.log(np.random.randint(0, np.exp(config.field_size))))]
+    np.random.uniform()
+    return parent1, parent2
+
+
 def main():
     # 1
     # generate initial population of N organisms randomly
@@ -118,33 +141,33 @@ def main():
     while population[0].fitness != 0:
         average_fitness = compute_average_fitness(population)
         print(population[0].fitness)
+
         # 3
         # produce new generation by:
         # 3.1.
-        # selecting two organisms from old generation for mating
-        # choose fitter ones, maybe not THE fittest
-        # population2 = population.copy()
-        individual1 = population[int(np.log(np.random.randint(0, np.exp(config.field_size))))]
-        # population2.remove(individual1)
-        individual2 = population[int(np.log(np.random.randint(0, np.exp(config.field_size))))]
-        # population2.remove(individual2)
+        new_pop = []
+        while len(new_pop) < len(population):
+            # selecting two organisms from old generation for mating
+            # choose fitter ones, maybe not THE fittest
+            parent1, parent2 = choose_parents(population)
 
-        # 3.2
-        # recombine genetic material with probability p_c, i.e. crossover
-        # mutate with very small probability
-        # create a pair of children
+            # 3.2
+            # recombine genetic material with probability p_c, i.e. crossover
+            # mutate with very small probability
+            # create a pair of children
 
-        child1, child2 = crossover(individual1, individual2)
-        population.extend([child1, child2])
-        sort_population(population)
-        # 3.3
-        # compute the fitness of children and insert into population
-
+            child1, child2 = crossover(parent1, parent2)
+            # 3.3
+            # compute the fitness of children and insert into population
+            new_pop.extend([child1, child2])
         # 3.4
         # if the size of new population is smaller than the old one, repeat from 3.1 onwards
 
         # 4
         # replace the old population with the new one
+        population = new_pop
+        sort_population(population)
+
 
         # 5
         # if satisfied with fittest individual -> finish

@@ -48,13 +48,14 @@ def compute_fitness_only_diagonal(genotype: np.ndarray) -> int:
             # if equal subtract one from base fitness
             if abs(pos1[0] - pos2[0]) == abs(pos1[1] - pos2[1]):
                 fitness -= 1
-    return fitness
+    return config.field_size * (config.field_size + 1) * 0.5 +  fitness
 
 
 def compute_fitness(genotype: np.ndarray) -> int:
     """
     Computes the fitness for an Organism
-    In particular count the number of times a queen collides with another queen.
+    In particular count the number of times a queen collides with another queen and
+    substract this number from n*(n+1)/2 (the maximal number of collisions)
 
     :param genotype: np.ndarray with config.field_size many pairs of integers
     :return: fitness value
@@ -68,4 +69,7 @@ def compute_fitness(genotype: np.ndarray) -> int:
                 fitness -= 1
             if pos1[0] == pos2[0] or pos1[1] == pos2[1]:
                 fitness -= 1
-    return fitness
+    # add current fitness value from maximal number of collisions
+    # for n queens it is n + (n-1) + (n-2) +... + 1 because alle queens can be in one row
+    # and collide with each other
+    return config.field_size * (config.field_size + 1) * 0.5 + fitness
