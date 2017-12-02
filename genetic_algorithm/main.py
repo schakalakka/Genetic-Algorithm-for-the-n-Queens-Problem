@@ -19,9 +19,13 @@ def main():
     # population = individual.compute_fitness_of_all(population)
     my_population = Population(config.number_of_organisms, sort=True)
 
-    while my_population[0].fitness != 0:
+
+    max_fitness = config.field_size*(config.field_size-1) * 0.5
+    while my_population[0].fitness != max_fitness:
         average_fitness = my_population.compute_average_fitness()
-        print(my_population[0].fitness)
+        print(my_population[0].fitness, max_fitness)
+        # print(average_fitness)
+        # print(my_population[0].genotype)
 
         # 3
         # produce new generation by:
@@ -37,9 +41,14 @@ def main():
             # mutate with very small probability
             # create a pair of children
 
-            child1, child2 = my_population.crossover(parent1, parent2)
+            # child1, child2 = my_population.crossover(parent1, parent2, method='uniform')
+            child1, child2 = my_population.crossover(parent1, parent2, method='one_point')
+            if np.random.uniform() < config.mutation_probablity:
+                child1.mutate()
+            if np.random.uniform() < config.mutation_probablity:
+                child2.mutate()
             # 3.3
-            # compute the fitness of children and insert into population
+            # insert into population
             new_pop.add(child1, child2)
         # 3.4
         # if the size of new population is smaller than the old one, repeat from 3.1 onwards
@@ -53,6 +62,13 @@ def main():
         # if satisfied with fittest individual -> finish
         # if population converged, i.e. 95% of individuals are the same -> finish
         # otherwise go to 3 and repeat
+
+
+    if len(my_population[0].genotype) != len(set(my_population[0].genotype)):
+        print('ERROR!!!')
+    print(my_population[0])
+    my_population[0].compute_fitness()
+    print(average_fitness)
 
 
 if __name__ == '__main__':

@@ -10,78 +10,60 @@ class Organism:
     def __init__(self, genotype=None):
         """
         Creates an Organism from either
-        A given np.ndarray of the form [(0,0), (1,3), ...]
-        A given list of tuples of the form [(0,0), (1,3), ...]
+        A given np.ndarray of the form [1,2,4,3,0,5]
+        A given list of tuples of the form [1,2,4,3,0,5]
         or if genotype=None one Organism is generated randomly
         :param genotype: np.ndarray, list or None
         """
         if genotype is None:
-            rows = list(np.arange(config.field_size))
-            cols = list(np.arange(config.field_size))
-            genotype = []
-            while rows and cols:
-                current_row = rows[random.randint(0, len(rows) - 1)]
-                current_col = cols[random.randint(0, len(cols) - 1)]
-                rows.remove(current_row)
-                cols.remove(current_col)
-                genotype.append((current_row, current_col))
-            self.genotype = np.array(genotype)
+            self.genotype = np.random.randint(0, config.field_size, config.field_size)
         elif type(genotype) is np.ndarray:
             self.genotype = genotype
         elif type(genotype) is list:
             self.genotype = np.array(genotype)
         else:
             print('Type of genotype is not correct. Either specify np.ndarray, list or None.')
-        self.fitness = self.compute_fitness()
+        self.compute_fitness()  # set fitness
 
-    def compute_fitness(self) -> int:
+    def __repr__(self):
         """
-        Computes the fitness value
+        Representation function for printing, i.e. print(organism)
         :return:
         """
-        return self.compute_fitness_only_diagonal()
+        repr = [f'Fitness: {self.fitness}']
+        repr.append(f'Genotype: {self.genotype}')
+        repr.append((config.field_size*2+1)*'-')
+        for i in self.genotype:
+            repr.append('|'+i * ' |' + 'Q|' + (config.field_size - i-1) * ' |')
+            repr.append((config.field_size*2+1)*'-')
+        return '\n'.join(repr)
 
-    def compute_fitness_only_diagonal(self) -> int:
+
+    def compute_fitness(self):
         """
-        Computes the fitness for an individual
-        In particular count the number of times an individual collides with another individual.
-
-        !!!!!!!!!!This version assumes there is only one queen per row and columns!!!!!!!
-        Because there is only one queen per row and column this can only happen diagonally.
-        This means if the the row/vertical distance is equal to the column/horizontal distance
-
-        :return: fitness value
-        """
-        fitness = 0
-        for i, pos1 in enumerate(self.genotype):
-            for pos2 in self.genotype[i + 1:]:
-                # compare the vertical and horizontal distances
-                # if equal subtract one from base fitness
-                if abs(pos1[0] - pos2[0]) == abs(pos1[1] - pos2[1]):
-                    fitness -= 1
-        return config.field_size * (config.field_size + 1) * 0.5 + fitness
-
-    def compute_fitness_with_diagonal(self) -> int:
-        """
-        Computes the fitness for an Organism
+        Computes and sets(!) the fitness for an Organism
         In particular count the number of times a queen collides with another queen and
-        substract this number from n*(n+1)/2 (the maximal number of collisions)
+        subtract this number from n*(n+1)/2 (the maximal number of collisions)
 
-        :return: fitness value
+        :return:
         """
-        fitness = 0
+        fitness = config.field_size * (config.field_size - 1) * 0.5
         for i, pos1 in enumerate(self.genotype):
-            for pos2 in self.genotype[i + 1:]:
-                # compare the vertical and horizontal distances
-                # if equal subtract one from base fitness
-                if abs(pos1[0] - pos2[0]) == abs(pos1[1] - pos2[1]):
+            for j, pos2 in enumerate(self.genotype[i + 1:]):
+                # j+1 is equal to the differences in rows
+                # remember there can only be one queen per row but several per column
+                # compare j+1 with the difference in columns
+                # if equal the queens collides diagonally
+                if abs(pos1 - pos2) == j+1:
+                    # if equal subtract one from base fitness
                     fitness -= 1
-                if pos1[0] == pos2[0] or pos1[1] == pos2[1]:
+                if pos1 == pos2:
+                    # the two queens are in one column
                     fitness -= 1
         # add current fitness value from maximal number of collisions
-        # for n queens it is n + (n-1) + (n-2) +... + 1 because alle queens can be in one row
+        # for n queens it is n + (n-1) + (n-2) +... + 1 because all queens can be in one column
         # and collide with each other
-        return config.field_size * (config.field_size + 1) * 0.5 + fitness
+        self.fitness =  fitness
 
     def crossover(self, parent2, method='one_point') -> Tuple:
         """
@@ -128,7 +110,7 @@ class Organism:
         :return: two children
         """
         # generate a series of length config.fieldsize of 0s and 1s
-        coinflips = random.randint(0, 1, config.field_size)
+        coinflips = np.random.randint(0, 1, config.field_size)
 
         # filter the indexes for which the coinflip is 0 or 1 respectively
         indexes_with_0 = [i for i, coinflip in enumerate(coinflips) if coinflip == 0]
@@ -138,10 +120,20 @@ class Organism:
         # for child1 take the chromosomes from parent 1 if coinflip is 0
         # and from parent 2 if coinflip is 1
         # for child 2 vice versa
-        child1_genotype = np.concatenate((self.genotype[indexes_with_1], parent2.genotype[indexes_with_1]), axis=0)
+        child1_genotype = np.concatenate((self.genotype[indexes_with_0], parent2.genotype[indexes_with_1]), axis=0)
         child2_genotype = np.concatenate((self.genotype[indexes_with_1], parent2.genotype[indexes_with_0]), axis=0)
 
         # create organisms and compoute fitness
         child1 = Organism(child1_genotype)
         child2 = Organism(child2_genotype)
         return child1, child2
+
+    def mutate(self):
+        """
+        Mutates an Organism, i.e. it chooses a random row (index) and a random column and overwrites it.
+        :return:
+        """
+        row = np.random.randint(0, config.field_size)
+        col = np.random.randint(0, config.field_size)
+        self.genotype[row] = col
+        self.compute_fitness()
