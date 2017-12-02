@@ -23,6 +23,7 @@ class Organism:
             self.genotype = np.array(genotype)
         else:
             print('Type of genotype is not correct. Either specify np.ndarray, list or None.')
+        self.fitness = 0
         self.compute_fitness()  # set fitness
 
     def __repr__(self):
@@ -32,12 +33,11 @@ class Organism:
         """
         repr = [f'Fitness: {self.fitness}']
         repr.append(f'Genotype: {self.genotype}')
-        repr.append((config.field_size*2+1)*'-')
+        repr.append((config.field_size * 2 + 1) * '-')
         for i in self.genotype:
-            repr.append('|'+i * ' |' + 'Q|' + (config.field_size - i-1) * ' |')
-            repr.append((config.field_size*2+1)*'-')
+            repr.append('|' + i * ' |' + 'Q|' + (config.field_size - i - 1) * ' |')
+            repr.append((config.field_size * 2 + 1) * '-')
         return '\n'.join(repr)
-
 
     def compute_fitness(self):
         """
@@ -54,7 +54,7 @@ class Organism:
                 # remember there can only be one queen per row but several per column
                 # compare j+1 with the difference in columns
                 # if equal the queens collides diagonally
-                if abs(pos1 - pos2) == j+1:
+                if abs(pos1 - pos2) == j + 1:
                     # if equal subtract one from base fitness
                     fitness -= 1
                 if pos1 == pos2:
@@ -63,7 +63,11 @@ class Organism:
         # add current fitness value from maximal number of collisions
         # for n queens it is n + (n-1) + (n-2) +... + 1 because all queens can be in one column
         # and collide with each other
-        self.fitness =  fitness
+        self.fitness = fitness
+
+    ####################################################################################################################
+    ## Crossover Methods
+    ####################################################################################################################
 
     def crossover(self, parent2, method='one_point') -> Tuple:
         """
@@ -80,7 +84,7 @@ class Organism:
             return self, parent2
         else:
             # if method is None use the default crossover method
-            method = method if method else config.default_crossover_method
+            method = method if method else config.crossover_method
             if method is 'one_point':
                 return self.one_point_crossover(parent2)
             elif method is 'uniform':
@@ -127,6 +131,10 @@ class Organism:
         child1 = Organism(child1_genotype)
         child2 = Organism(child2_genotype)
         return child1, child2
+
+    ####################################################################################################################
+    ## Mutation Methods
+    ####################################################################################################################
 
     def mutate(self):
         """

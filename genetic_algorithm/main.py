@@ -17,41 +17,45 @@ def main():
     # 2
     # compute fitness of each individual
     # population = individual.compute_fitness_of_all(population)
-    my_population = Population(config.number_of_organisms, sort=True)
+    my_population = Population(size=config.number_of_organisms, sort=True)
 
-
-    max_fitness = config.field_size*(config.field_size-1) * 0.5
+    # compute the max_fitness value, i.e. no collisions, for a given field_size
+    max_fitness = config.field_size * (config.field_size - 1) * 0.5
+    iter = 0
     while my_population[0].fitness != max_fitness:
-        average_fitness = my_population.compute_average_fitness()
-        print(my_population[0].fitness, max_fitness)
-        # print(average_fitness)
-        # print(my_population[0].genotype)
+        if iter > 1000:
+            config.crossover_method = 'uniform'
+        iter += 1
+        print(iter, my_population.max_fitness_value())
+        ### NEXT GENERATION ###
+        # produce next generation
+        # copy the fittest Organisms to the new population "they survive"
+        # percentage is determined by config.copy_threshold
+        new_pop = Population(my_population[:int(my_population.size() * config.copy_threshold)])
 
-        # 3
-        # produce new generation by:
-        # 3.1.
-        new_pop = Population()
-        while new_pop.size() < my_population.size():
+        # repeat as long as the new population is smaller than the population size
+        while new_pop.size() < config.number_of_organisms:
+            ### SELECTION ###
             # selecting two organisms from old generation for mating
             # choose fitter ones, maybe not THE fittest
-            parent1, parent2 = my_population.choose_parents()
+            parent1 = my_population.select_parent(method=config.parent_selection_method)
+            parent2 = my_population.select_parent(method=config.parent_selection_method)
 
-            # 3.2
+            ### CROSSOVER ###
             # recombine genetic material with probability p_c, i.e. crossover
             # mutate with very small probability
             # create a pair of children
+            child1, child2 = my_population.crossover(parent1, parent2, method=config.crossover_method)
 
-            # child1, child2 = my_population.crossover(parent1, parent2, method='uniform')
-            child1, child2 = my_population.crossover(parent1, parent2, method='one_point')
-            if np.random.uniform() < config.mutation_probablity:
+            ### MUTATION ###
+            # let the children mutate with a small probability
+            if np.random.uniform() < config.mutation_probability:
                 child1.mutate()
-            if np.random.uniform() < config.mutation_probablity:
+            if np.random.uniform() < config.mutation_probability:
                 child2.mutate()
-            # 3.3
-            # insert into population
+
+            # insert into new population
             new_pop.add(child1, child2)
-        # 3.4
-        # if the size of new population is smaller than the old one, repeat from 3.1 onwards
 
         # 4
         # replace the old population with the new one
@@ -63,12 +67,12 @@ def main():
         # if population converged, i.e. 95% of individuals are the same -> finish
         # otherwise go to 3 and repeat
 
-
     if len(my_population[0].genotype) != len(set(my_population[0].genotype)):
         print('ERROR!!!')
-    print(my_population[0])
-    my_population[0].compute_fitness()
-    print(average_fitness)
+    the_winner = my_population.fittest_organism()
+    print(the_winner)
+    print(
+        f'Number of Iterations:{iter}\nAverage Fitness of final Population: {my_population.compute_average_fitness()}')
 
 
 if __name__ == '__main__':

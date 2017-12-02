@@ -7,19 +7,24 @@ from genetic_algorithm import config
 
 class Population:
 
-    def __init__(self, size=None, sort=True):
+    def __init__(self, population=None, size=None, sort=True):
         """
         Generates a list of a given size of Organisms with the genotype that there is only queen per row and column.
         If no size is given an empty population is created
+        :param population: if not None creates a population from a given (sub) population
         :param size: int
+        :param sort: if True it will sort the population
         """
-        if size is None:
-            self.population = []
-            self.accumulated_fitness_values = []
+        if population:
+            self.population = population
+            self.sort()
         else:
-            self.population = [Organism() for _ in range(size)]
-            if sort:
-                self.sort()
+            if size is None:
+                self.population = []
+            else:
+                self.population = [Organism() for _ in range(size)]
+                if sort:
+                    self.sort()
         self.accumulated_fitness_values = []
         self.accumulated_fitness_computed = False
 
@@ -116,9 +121,29 @@ class Population:
         """
         return parent1.crossover(parent2, method=method)
 
-    def choose_parents(self):
+    ####################################################################################################################
+    ## Selection Methods following
+    ####################################################################################################################
+
+    def select_parent(self, method=True, **kwargs) -> Organism:
         """
-        Choose two parents for crossover. It will choose fitter individuals with a higher probability
+        Switch function for choosing the selection method for parents
+        :param method:
+        :return:
+        """
+        if method is 'fast':
+            return self.choose_parents_fast()
+        elif method is 'roulette':
+            return self.roulette_wheel_selection()
+        elif method is 'truncation':
+            return self.truncation_selection(kwargs.get('truncation_threshold', config.truncation_threshold))
+        elif method is 'tournament':
+            return self.tournament_selection(kwargs.get('competitors', config.tournament_competitors))
+
+    def roulette_wheel_selection(self) -> Organism:
+        """
+        Roulette Wheel Selection
+        Choose parent for crossover. It will choose fitter individuals with a higher probability
         :return: two parents/Organisms
         """
         # compute accumulated fitnesses if not already done
@@ -127,18 +152,40 @@ class Population:
         # choose between 0 and max(accumulated_fitness_values) = last element of list
         # (because they were sorted beforehand)
         a, b = np.random.randint(0, self.accumulated_fitness_values[-1], 2)
-        parent1 = self.population[
+        parent = self.population[
             next(i for i, acc_fitness in enumerate(self.accumulated_fitness_values) if acc_fitness >= a)]
-        parent2 = self.population[
-            next(i for i, acc_fitness in enumerate(self.accumulated_fitness_values) if acc_fitness >= b)]
-        return parent1, parent2
+        return parent
 
-    def choose_parents_fast(self):
+    def choose_parents_fast(self) -> Organism:
         """
-        !!!!!!!!DOES NOT WORK YET!!!!!!!!!
+        Chooses parents via a set random distribution
+        The distribution so far is a uniform distribution on [0,1] potentiated by 4 (i.e. smaller values are
+        more likely!!) and then multiplied by the population size.
+        TODO find a better distribution!
         :return:
         """
-        parent1 = self.population[int(np.log(np.random.randint(0, np.exp(config.field_size))))]
-        parent2 = self.population[int(np.log(np.random.randint(0, np.exp(config.field_size))))]
-        np.random.uniform()
-        return parent1, parent2
+        parent = self.population[int(np.random.uniform() ** 4 * config.number_of_organisms)]
+        return parent
+
+    def truncation_selection(self, truncation_threshold=0.5) -> Organism:
+        """
+        Truncation Selection:
+        Selects an Organism randomly from the best x% of the population.
+        If the truncation_threshold is 0.5 then only the best 50% Organisms are considered.
+        Too low truncation_threshold values are too elitist
+        :param truncation_threshold: between 0 and 1, typically between 0.5 and 0.1
+        :return: Organism
+        """
+        return self[np.random.randint(0, int(self.size() * truncation_threshold))]
+
+    def tournament_selection(self, competitors=10) -> Organism:
+        """
+        Tournament selection:
+        Select a number of Organisms from a population and return the fittest one
+        :param competitors: Number of randomly chosen Organisms for the tournament
+        :return: Organism
+        """
+        choosen_for_tournament = Population(
+            [self[i] for i in np.random.randint(0, config.number_of_organisms, competitors)])
+        choosen_for_tournament.sort()
+        return choosen_for_tournament[0]
