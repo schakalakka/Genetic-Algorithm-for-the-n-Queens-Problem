@@ -111,18 +111,18 @@ class Population:
         return self.population[0].fitness
 
     @staticmethod
-    def crossover(parent1: Organism, parent2: Organism, method='one_point') -> Tuple:
+    def crossover(parent1: Organism, parent2: Organism, method: str) -> Tuple:
         """
         Convenience function for computing two children via crossover
         :param parent1: Organism
         :param parent2: Organism
-        :param method: default 'one_point'
+        :param method: 'one_point', 'uniform' or 'random'
         :return: two children
         """
         return parent1.crossover(parent2, method=method)
 
     ####################################################################################################################
-    ## Selection Methods following
+    ## Selection Methods
     ####################################################################################################################
 
     def select_parent(self, method, **kwargs) -> Organism:
@@ -146,7 +146,7 @@ class Population:
         elif method is 'tournament':
             return self.tournament_selection(kwargs.get('competitors', config.tournament_competitors))
         elif method is 'random':
-            methods_without_random = ['fast, roulette', 'truncation', 'tournament']
+            methods_without_random = ['fast', 'roulette', 'truncation', 'tournament']
             return self.select_parent(method=methods_without_random[np.random.randint(0, len(methods_without_random))])
 
     def roulette_wheel_selection(self) -> Organism:

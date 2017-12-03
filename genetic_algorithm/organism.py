@@ -68,13 +68,13 @@ class Organism:
     ## Crossover Methods
     ####################################################################################################################
 
-    def crossover(self, parent2, method='one_point') -> Tuple:
+    def crossover(self, parent2, method) -> Tuple:
         """
         Returns crossover children computed by the given method
         If a random value is higher than the crossover probability the parents will be returned without any crossover
         :param self: Organism, parent1
         :param parent2: Organism
-        :param method: str, can be 'uniform' or 'one_point'
+        :param method: str, can be 'random', 'uniform' or 'one_point'
         :return: two children
         """
         # if random value is higher than crossover probability no children will be produced
@@ -88,6 +88,9 @@ class Organism:
                 return self.one_point_crossover(parent2)
             elif method is 'uniform':
                 return self.uniform_crossover(parent2)
+            elif method is 'random':
+                method_list = ['uniform', 'one_point']
+                return self.crossover(parent2, method=method_list[np.random.randint(0, len(method_list))])
 
     def one_point_crossover(self, parent2) -> Tuple:
         """

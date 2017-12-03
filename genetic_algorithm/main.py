@@ -1,10 +1,13 @@
 import numpy as np
+import time
+import argparse
 
 from genetic_algorithm.population import Population
 from genetic_algorithm import config
 
 
 def main():
+    t0 = time.time()
     # 1
     # generate initial population of N organisms randomly
     # but maybe with given conditions taken into account
@@ -20,10 +23,11 @@ def main():
     max_fitness = config.field_size * (config.field_size - 1) * 0.5
     iterations = 0
     while my_population[0].fitness != max_fitness:
-        if iterations > 1000:
-            config.crossover_method = 'uniform'
         iterations += 1
-        print(iterations, my_population.max_fitness_value())
+        if iterations % 100 == 0:
+            print(iterations, my_population.max_fitness_value())
+        if iterations % 1000 == 0:
+            config.mutation_probability = min(iterations / 10000.0, 1)
         ### NEXT GENERATION ###
         # produce next generation
         # copy the fittest Organisms to the new population "they survive"
@@ -69,7 +73,7 @@ def main():
     the_winner = my_population.fittest_organism()
     print(the_winner)
     print(
-        f'Number of Iterations:{iter}\nAverage Fitness of final Population: {my_population.compute_average_fitness()}')
+        f'Number of Iterations:{iterations}\nTotal Time: {time.time()-t0}\nAverage Fitness of final Population: {my_population.compute_average_fitness()}')
 
 
 if __name__ == '__main__':
