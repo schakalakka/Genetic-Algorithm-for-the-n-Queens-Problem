@@ -1,8 +1,7 @@
 import numpy as np
-import random
 from typing import Tuple
 
-from . import config
+from genetic_algorithm import config
 
 
 class Organism:
@@ -136,12 +135,157 @@ class Organism:
     ## Mutation Methods
     ####################################################################################################################
 
-    def mutate(self):
+    def mutate(self, method):
         """
-        Mutates an Organism, i.e. it chooses a random row (index) and a random column and overwrites it.
+        General mutation method. Chooses the specific mutation method given by 'method'.
+        Possible methods:   'exchange': switch two rows randomly
+                            'scramble': choose random segment and shuffle its values
+                            'single': choose one row randomly and change its column
+                            'displacement': choose a segment and move it to another point in the array
+                            'insertion': choose one element and insert it in another place, like displacement but only
+                                        with one element
+                            'inversion': invert the order of a random segment
+                            'displacement_inversion': invert the order of random segment and insert it elsewhere,
+                                        displacement and inversion together
+                            'random': one of the above methods randomly
+        :param method: 'exchange', 'scramble', 'single', 'displacement', 'insertion', 'inversion',
+                        'displacement_inversion', 'random'
+        :return:
+        """
+        if method is 'single':
+            self.single_mutation()
+        elif method is 'exchange':
+            self.exchange_mutation()
+        elif method is 'scramble':
+            self.scramble_mutation()
+        elif method is 'displacement':
+            self.displacement_mutation()
+        elif method is 'inversion':
+            self.inversion_mutation()
+        elif method is 'insertion':
+            self.insertion_mutation()
+        elif method is 'displacement_inversion':
+            self.displacement_inversion_mutation()
+        elif method is 'random':
+            method_list = ['exchange', 'scramble', 'single', 'displacement', 'insertion', 'inversion',
+                           'displacement_inversion']
+            self.mutate(method=method_list[np.random.randint(0, len(method_list))])
+
+    def single_mutation(self):
+        """
+        Single Mutation:
+        It chooses a random row (index) and a random column and overwrites it with another value (i.e. column).
         :return:
         """
         row = np.random.randint(0, config.field_size)
         col = np.random.randint(0, config.field_size)
         self.genotype[row] = col
         self.compute_fitness()
+
+    def exchange_mutation(self):
+        """
+        Exchange Mutation:
+        Select two rows randomly and exchange them.
+        It is possible/allowed that the same rows are selected. Then nothing will happen
+        :return:
+        """
+        row1 = np.random.randint(0, config.field_size)
+        row2 = np.random.randint(0, config.field_size)
+        tmp = self.genotype[row2]
+        self.genotype[row2] = self.genotype[row1]
+        self.genotype[row1] = tmp
+        self.compute_fitness()
+
+    def scramble_mutation(self):
+        """
+        Scramble Mutation:
+        Select two indexes randomly and shuffle/scramble the segment between them
+        :return:
+        """
+        # get two random integers in the range, the lower is the start, the greater is the end of the segment
+        begin_and_end = np.random.randint(0, config.field_size, 2)
+        if begin_and_end[0] != begin_and_end[1]:  # if begin and end are the same there is nothing to do
+            # sort such that begin_and_end[0] is the lower one, i.e. the begin of the segment
+            begin_and_end.sort()
+            # shuffle values in the segment (numpy does it in-place)
+            np.random.shuffle(self.genotype[begin_and_end[0]: begin_and_end[1]])
+            self.compute_fitness()
+
+    def displacement_mutation(self):
+        """
+        Displacement Mutation:
+        Chooses a random segment (i.e. start and end index) and inserts this segment to a random position
+        :return:
+        """
+        # get two random integers in the range, the lower is the start, the greater is the end of the segment
+        begin_and_end = np.random.randint(0, config.field_size, 2)
+        if begin_and_end[0] != begin_and_end[1]:  # if begin and end are the same there is nothing to do
+            # sort such that begin_and_end[0] is the lower one, i.e. the begin of the segment
+            begin_and_end.sort()
+            # get new insertion position
+            new_position = np.random.randint(0, config.field_size - (begin_and_end[1] - begin_and_end[0]))
+            # copy the values from the segment to a temp variable
+            vals = self.genotype[begin_and_end[0]: begin_and_end[1]]
+            # delete segment
+            self.genotype = np.delete(self.genotype, range(begin_and_end[0], begin_and_end[1]))
+            # insert segment from new position
+            self.genotype = np.insert(self.genotype, new_position, vals)
+            # compute new fitness again
+            self.compute_fitness()
+
+    def insertion_mutation(self):
+        """
+        Insertion Mutation:
+        chooses one row/index randomly, takes the element and inserts it at another random position
+        :return:
+        """
+        from_index = np.random.randint(0, config.field_size)
+        to_index = np.random.randint(0, config.field_size - 1)  # one less because we temporarily remove one element
+        val = self.genotype[from_index]
+        self.genotype = np.delete(self.genotype, from_index)
+        self.genotype = np.insert(self.genotype, to_index, val)
+        self.compute_fitness()
+
+    def inversion_mutation(self):
+        """
+        Inversion Mutation:
+        Invert/flip a randomly chosen segment in the genotype
+        :return:
+        """
+        # get two random integers in the range, the lower is the start, the greater is the end of the segment
+        begin_and_end = np.random.randint(0, config.field_size, 2)
+        if begin_and_end[0] != begin_and_end[1]:  # if begin and end are the same there is nothing to do
+            # sort such that begin_and_end[0] is the lower one, i.e. the begin of the segment
+            begin_and_end.sort()
+            # concatenate:  part before flipped segment
+            #               flipped/inverted segment
+            #               part after flipped segment
+            self.genotype = np.concatenate((self.genotype[:begin_and_end[0]],
+                                            np.flip(self.genotype[begin_and_end[0]: begin_and_end[1]], axis=0),
+                                            self.genotype[begin_and_end[1]:]))
+            self.compute_fitness()
+
+    def displacement_inversion_mutation(self):
+        """
+        Displacement Mutation:
+        Chooses a random segment (i.e. start and end index), flips/inverts it and
+        inserts this segment to a random position
+        :return:
+        """
+        # get two random integers in the range, the lower is the start, the greater is the end of the segment
+        begin_and_end = np.random.randint(0, config.field_size, 2)
+        if begin_and_end[0] != begin_and_end[1]:  # if begin and end are the same there is nothing to do
+            # sort such that begin_and_end[0] is the lower one, i.e. the begin of the segment
+            begin_and_end.sort()
+            # get new insertion position
+            new_position = np.random.randint(0, config.field_size - (begin_and_end[1] - begin_and_end[0]))
+            # copy the values from the segment to a temp variable, necessary for deleting
+            vals = self.genotype[begin_and_end[0]: begin_and_end[1]]
+            # flip the temp values, necessary for inserting
+            vals_flipped = np.flip(vals, axis=0)
+            # delete segment
+            self.genotype = np.delete(self.genotype, range(begin_and_end[0], begin_and_end[1]))
+            # insert flipped segment from new position
+            self.genotype = np.insert(self.genotype, new_position, vals_flipped)
+            # compute new fitness again
+            self.compute_fitness()

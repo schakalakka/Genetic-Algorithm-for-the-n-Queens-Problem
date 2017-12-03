@@ -125,10 +125,16 @@ class Population:
     ## Selection Methods following
     ####################################################################################################################
 
-    def select_parent(self, method=True, **kwargs) -> Organism:
+    def select_parent(self, method, **kwargs) -> Organism:
         """
         Switch function for choosing the selection method for parents
-        :param method:
+        Possible methods:
+        'fast': fast random distribution method, fitter individuals are more likely to be chosen
+        'truncation': truncate the population and choose randomly from the fittest x percent
+        'tournament': choose several competitors/Organisms for a tournament and choose the fittest
+        'roulette': choose randomly with a higher probabilty for fitter individuals
+        'random': randomly choose one from the methods above
+        :param method: 'random', 'fast', 'tournament', 'truncation', 'roulette'
         :return:
         """
         if method is 'fast':
@@ -139,6 +145,9 @@ class Population:
             return self.truncation_selection(kwargs.get('truncation_threshold', config.truncation_threshold))
         elif method is 'tournament':
             return self.tournament_selection(kwargs.get('competitors', config.tournament_competitors))
+        elif method is 'random':
+            methods_without_random = ['fast, roulette', 'truncation', 'tournament']
+            return self.select_parent(method=methods_without_random[np.random.randint(0, len(methods_without_random))])
 
     def roulette_wheel_selection(self) -> Organism:
         """

@@ -1,8 +1,5 @@
 import numpy as np
-import random
-from typing import List, Tuple
 
-from genetic_algorithm.organism import Organism
 from genetic_algorithm.population import Population
 from genetic_algorithm import config
 
@@ -21,12 +18,12 @@ def main():
 
     # compute the max_fitness value, i.e. no collisions, for a given field_size
     max_fitness = config.field_size * (config.field_size - 1) * 0.5
-    iter = 0
+    iterations = 0
     while my_population[0].fitness != max_fitness:
-        if iter > 1000:
+        if iterations > 1000:
             config.crossover_method = 'uniform'
-        iter += 1
-        print(iter, my_population.max_fitness_value())
+        iterations += 1
+        print(iterations, my_population.max_fitness_value())
         ### NEXT GENERATION ###
         # produce next generation
         # copy the fittest Organisms to the new population "they survive"
@@ -50,9 +47,9 @@ def main():
             ### MUTATION ###
             # let the children mutate with a small probability
             if np.random.uniform() < config.mutation_probability:
-                child1.mutate()
+                child1.mutate(config.mutation_method)
             if np.random.uniform() < config.mutation_probability:
-                child2.mutate()
+                child2.mutate(config.mutation_method)
 
             # insert into new population
             new_pop.add(child1, child2)
