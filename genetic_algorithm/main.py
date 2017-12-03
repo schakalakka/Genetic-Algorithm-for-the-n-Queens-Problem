@@ -22,7 +22,7 @@ def main():
     # compute the max_fitness value, i.e. no collisions, for a given field_size
     max_fitness = config.field_size * (config.field_size - 1) * 0.5
     iterations = 0
-    while my_population[0].fitness != max_fitness:
+    while my_population[0].fitness != max_fitness and iterations < config.max_iterations:
         iterations += 1
         if iterations % 100 == 0 and config.verbose:
             print(iterations, my_population.max_fitness_value())
@@ -74,7 +74,8 @@ def main():
         print(
             f'Number of Iterations:{iterations}\nTotal Time: {time.time()-t0}\nAverage Fitness of final Population: {my_population.compute_average_fitness()}')
     else:
-        print(f'{iterations};{time.time()-t0};{the_winner.fitness};{my_population.compute_average_fitness()}')
+        return iterations, time.time() - t0, the_winner.fitness, my_population.compute_average_fitness()
+
 
 if __name__ == '__main__':
     main()

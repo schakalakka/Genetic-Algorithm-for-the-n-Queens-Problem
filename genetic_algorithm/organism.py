@@ -91,7 +91,7 @@ class Organism:
             elif method is 'pmx':
                 self.pmx_crossover(parent2)
             elif method is 'random':
-                method_list = ['uniform', 'one_point', 'pmx']
+                method_list = ['uniform', 'one_point']
                 return self.crossover(parent2, method=method_list[np.random.randint(0, len(method_list))])
 
     def pmx_crossover(self, parent2) -> Tuple:
