@@ -74,7 +74,7 @@ class Organism:
         If a random value is higher than the crossover probability the parents will be returned without any crossover
         :param self: Organism, parent1
         :param parent2: Organism
-        :param method: str, can be 'random', 'uniform' or 'one_point'
+        :param method: str, can be 'random', 'uniform', 'pmx' or 'one_point'
         :return: two children
         """
         # if random value is higher than crossover probability no children will be produced
@@ -88,9 +88,14 @@ class Organism:
                 return self.one_point_crossover(parent2)
             elif method is 'uniform':
                 return self.uniform_crossover(parent2)
+            elif method is 'pmx':
+                self.pmx_crossover()
             elif method is 'random':
-                method_list = ['uniform', 'one_point']
+                method_list = ['uniform', 'one_point', 'pmx']
                 return self.crossover(parent2, method=method_list[np.random.randint(0, len(method_list))])
+
+    def pmx_crossover(self):
+        pass
 
     def one_point_crossover(self, parent2) -> Tuple:
         """

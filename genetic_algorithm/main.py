@@ -24,9 +24,9 @@ def main():
     iterations = 0
     while my_population[0].fitness != max_fitness:
         iterations += 1
-        if iterations % 100 == 0:
+        if iterations % 100 == 0 and config.verbose:
             print(iterations, my_population.max_fitness_value())
-        if iterations % 1000 == 0:
+        if iterations % 1000 == 0 and config.adapt_mutability:
             config.mutation_probability = min(iterations / 10000.0, 1)
         ### NEXT GENERATION ###
         # produce next generation
@@ -68,13 +68,13 @@ def main():
         # if population converged, i.e. 95% of individuals are the same -> finish
         # otherwise go to 3 and repeat
 
-    if len(my_population[0].genotype) != len(set(my_population[0].genotype)):
-        print('ERROR!!!')
     the_winner = my_population.fittest_organism()
-    print(the_winner)
-    print(
-        f'Number of Iterations:{iterations}\nTotal Time: {time.time()-t0}\nAverage Fitness of final Population: {my_population.compute_average_fitness()}')
-
+    if config.verbose:
+        print(the_winner)
+        print(
+            f'Number of Iterations:{iterations}\nTotal Time: {time.time()-t0}\nAverage Fitness of final Population: {my_population.compute_average_fitness()}')
+    else:
+        print(f'{iterations};{time.time()-t0};{the_winner.fitness};{my_population.compute_average_fitness()}')
 
 if __name__ == '__main__':
     main()
