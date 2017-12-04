@@ -91,11 +91,53 @@ class Organism:
             elif method is 'pmx':
                 self.pmx_crossover(parent2)
             elif method is 'random':
-                method_list = ['uniform', 'one_point']
+                method_list = ['uniform', 'one_point', 'pmx']
                 return self.crossover(parent2, method=method_list[np.random.randint(0, len(method_list))])
 
     def pmx_crossover(self, parent2) -> Tuple:
-        pass
+        size = config.field_size
+        cxpoint1 = np.random.randint(1, size)
+        cxpoint2 = np.random.randint(1, size - 1)
+        if cxpoint2 >= cxpoint1:
+            cxpoint2 += 1
+        else:  # Swap the two cx points
+            cxpoint1, cxpoint2 = cxpoint2, cxpoint1
+
+        child1_genotype= [None]*size
+        child2_genotype= [None]*size
+
+        # Copy a slice from first parent
+        child1_genotype[cxpoint1:cxpoint2] = self.genotype[cxpoint1:cxpoint2].copy()
+        child2_genotype[cxpoint1:cxpoint2] = parent2.genotype[cxpoint1:cxpoint2].copy()
+
+        # Map the same slice in second parent to child using indices from first parent
+        for ind, x in enumerate(parent2.genotype[cxpoint1:cxpoint2]):
+            ind += cxpoint1
+            if x not in child1_genotype:
+                while child1_genotype[ind] != None:
+                    ind = parent2.genotype[self.genotype[ind]]
+                    child1_genotype[ind] = x
+
+        for ind1, x in enumerate(self.genotype[cxpoint1:cxpoint2]):
+            ind1 += cxpoint1
+            if x not in child2_genotype:
+                while child2_genotype[ind1] != None:
+                    ind = self.genotype[parent2.genotype[ind1]]
+                    child2_genotype[ind1] = x
+
+        # Copy over the rest from the second parent
+        for ind, x in enumerate(child1_genotype):
+            if x == None:
+                child1_genotype = parent2.genotype[ind]
+
+        for ind1, x in enumerate(child2_genotype):
+            if x == None:
+                child2_genotype = self.genotype[ind1]
+
+        # create organisms and compute fitness
+        child1 = Organism(child1_genotype)
+        child2 = Organism(child2_genotype)
+        return child1, child2
 
     def one_point_crossover(self, parent2) -> Tuple:
         """
