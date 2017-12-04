@@ -8,8 +8,8 @@ max_iterations = 10000
 
 # SELECTION PARAMETERS
 parent_selection_method = 'random'  # possible options: 'random', 'fast', 'tournament', 'truncation', 'roulette'
-truncation_threshold = 0.5  # truncation of population, only for truncation method
-tournament_competitors = 10  # number of competitors in a selection tournament
+truncation_threshold = 0.5  # truncation of population, only for truncation method, 0.5 seems to be the best
+tournament_competitors = 10  # number of competitors in a selection tournament, 10 till 30 seems  good?
 copy_threshold = 0.1  # parameter for copying a percentage from the old population to the new one
 
 # CROSSOVER PARAMETERS

@@ -103,8 +103,8 @@ class Organism:
         else:  # Swap the two cx points
             cxpoint1, cxpoint2 = cxpoint2, cxpoint1
 
-        child1_genotype= [None]*size
-        child2_genotype= [None]*size
+        child1_genotype = [None] * size
+        child2_genotype = [None] * size
 
         # Copy a slice from first parent
         child1_genotype[cxpoint1:cxpoint2] = self.genotype[cxpoint1:cxpoint2].copy()
