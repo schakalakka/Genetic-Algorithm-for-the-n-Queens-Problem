@@ -115,14 +115,16 @@ class Organism:
             ind += cxpoint1
             if x not in child1_genotype:
                 while child1_genotype[ind] != None:
-                    ind = parent2.genotype[self.genotype[ind]]
+                    print(parent2.genotype.tolist())
+                    ind = list(parent2.genotype).index([self.genotype[ind]])
+
                     child1_genotype[ind] = x
 
         for ind1, x in enumerate(self.genotype[cxpoint1:cxpoint2]):
             ind1 += cxpoint1
             if x not in child2_genotype:
                 while child2_genotype[ind1] != None:
-                    ind = self.genotype[parent2.genotype[ind1]]
+                    ind1 = self.genotype.tolist().index([parent2.genotype[ind1]])
                     child2_genotype[ind1] = x
 
         # Copy over the rest from the second parent
@@ -135,6 +137,8 @@ class Organism:
                 child2_genotype = self.genotype[ind1]
 
         # create organisms and compute fitness
+        print(child1_genotype)
+        print(child2_genotype)
         child1 = Organism(child1_genotype)
         child2 = Organism(child2_genotype)
         return child1, child2
