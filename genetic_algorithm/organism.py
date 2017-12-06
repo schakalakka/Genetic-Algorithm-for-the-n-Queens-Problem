@@ -98,9 +98,10 @@ class Organism:
 
     def pmx_crossover(self, parent2) -> Tuple:
         """
-
-        :param parent2:
-        :return:
+        Computes a partially mapped crossover and produces two children
+        :param self: Organism, "parent1"
+        :param parent2: Organism
+        :return: two children/Organisms
         """
         size = config.field_size
         cxpoint1 = np.random.randint(0, size)
@@ -224,7 +225,7 @@ class Organism:
         elif method is 'displacement_inversion':
             self.displacement_inversion_mutation()
         elif method is 'random':
-            method_list = ['exchange', 'scramble', 'single', 'displacement', 'insertion', 'inversion',
+            method_list = ['exchange', 'scramble', 'displacement', 'insertion', 'inversion',
                            'displacement_inversion']
             self.mutate(method=method_list[np.random.randint(0, len(method_list))])
 
