@@ -131,7 +131,7 @@ class Organism:
                 while child2_genotype[ind1] != None:
                     try:
                         ind1 = list(self.genotype).index([parent2.genotype[ind1]])
-                    except :
+                    except:
                         print('foo')
                 child2_genotype[ind1] = x
 
@@ -200,7 +200,6 @@ class Organism:
         General mutation method. Chooses the specific mutation method given by 'method'.
         Possible methods:   'exchange': switch two rows randomly
                             'scramble': choose random segment and shuffle its values
-                            'single': choose one row randomly and change its column
                             'displacement': choose a segment and move it to another point in the array
                             'insertion': choose one element and insert it in another place, like displacement but only
                                         with one element
@@ -208,13 +207,11 @@ class Organism:
                             'displacement_inversion': invert the order of random segment and insert it elsewhere,
                                         displacement and inversion together
                             'random': one of the above methods randomly
-        :param method: 'exchange', 'scramble', 'single', 'displacement', 'insertion', 'inversion',
+        :param method: 'exchange', 'scramble', 'displacement', 'insertion', 'inversion',
                         'displacement_inversion', 'random'
         :return:
         """
-        if method is 'single':
-            self.single_mutation()
-        elif method is 'exchange':
+        if method is 'exchange':
             self.exchange_mutation()
         elif method is 'scramble':
             self.scramble_mutation()
@@ -231,17 +228,6 @@ class Organism:
                            'displacement_inversion']
             self.mutate(method=method_list[np.random.randint(0, len(method_list))])
 
-    def single_mutation(self):
-        """
-        Single Mutation:
-        It chooses a random row (index) and a random column and overwrites it with another value (i.e. column).
-        :return:
-        """
-        row = np.random.randint(0, config.field_size)
-        col = np.random.randint(0, config.field_size)
-        self.genotype[row] = col
-        self.compute_fitness()
-
     def exchange_mutation(self):
         """
         Exchange Mutation:
@@ -251,9 +237,7 @@ class Organism:
         """
         row1 = np.random.randint(0, config.field_size)
         row2 = np.random.randint(0, config.field_size)
-        tmp = self.genotype[row2]
-        self.genotype[row2] = self.genotype[row1]
-        self.genotype[row1] = tmp
+        self.genotype[row1], self.genotype[row2] = self.genotype[row2], self.genotype[row1]
         self.compute_fitness()
 
     def scramble_mutation(self):

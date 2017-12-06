@@ -17,8 +17,8 @@ crossover_method = 'pmx'  # possible options: 'one_point', 'uniform', 'pmx', 'ra
 crossover_probability = 0.8  # usually between 0.6 and 1
 
 # MUTATION PARAMETERS
-mutation_method = 'random'  # 'random', 'exchange', 'scramble', 'single', 'displacement', 'insertion', 'inversion', 'displacement_inversion'
-mutation_probability = 0.0
-adapt_mutability = False  # if true the mutation_probability will increase over time
+mutation_method = 'random'  # 'random', 'exchange', 'scramble', 'displacement', 'insertion', 'inversion', 'displacement_inversion'
+mutation_probability = 0.01
+adapt_mutability = True  # if true the mutation_probability will increase over time
 
 verbose = True
