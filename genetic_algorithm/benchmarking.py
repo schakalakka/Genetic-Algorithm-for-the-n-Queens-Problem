@@ -4,8 +4,8 @@ import csv
 from genetic_algorithm import config
 from genetic_algorithm.main import main
 
-runs = 10
-field_sizes = [6]
+runs = 500
+field_sizes = [8]
 number_of_organisms = [100]  # [50, 100, 200, 500]
 
 # SELECTION
@@ -19,10 +19,10 @@ crossover_methods = ['pmx']  # TODO pmx is still missing
 crossover_probabilities = [0.8]  # [0.6, 0.7, 0.8, 0.9, 1]
 
 # MUTATION
-mutation_methods = [
-    'random']  # ['random', 'exchange', 'scramble', 'single', 'displacement', 'insertion', 'inversion','displacement_inversion']
-mutation_probabilities = [0.01]  # [0.001, 0.01, 0.1, 0.2, 0.3]
-adapt_mutabilities = [True]  # [False, True]
+mutation_methods = ['random', 'exchange', 'scramble', 'displacement', 'insertion', 'inversion',
+                    'displacement_inversion']
+mutation_probabilities = [0.3]  # [0.001, 0.01, 0.1, 0.2, 0.3]
+adapt_mutabilities = [False]  # [False, True]
 
 benchmark_list = []
 counter = 0
@@ -60,7 +60,7 @@ for config.field_size in field_sizes:
                                                 current_row['fitness'] = fitness
                                                 current_row['average_fitness'] = average_fitness
                                                 benchmark_list.append(current_row)
-    with open(f'benchmark_{config.field_size}_6.csv', 'w') as f:
+    with open(f'benchmark_{config.field_size}_9.csv', 'w') as f:
         csv_f = csv.DictWriter(f, delimiter='|', fieldnames=benchmark_list[0].keys())
         csv_f.writeheader()
         csv_f.writerows(benchmark_list)

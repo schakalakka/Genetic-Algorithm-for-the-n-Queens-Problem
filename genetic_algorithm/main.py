@@ -1,6 +1,5 @@
 import numpy as np
 import time
-import argparse
 
 from genetic_algorithm.population import Population
 from genetic_algorithm import config
@@ -26,8 +25,12 @@ def main():
         iterations += 1
         if iterations % 100 == 0 and config.verbose:
             print(iterations, my_population.max_fitness_value())
+
+        # if adapt mutability is set to True it will increase the mutation_probability each 1000 iterations
+        # by 10%
         if iterations % 1000 == 0 and config.adapt_mutability:
-            config.mutation_probability = min(iterations / 10000.0, 1)
+            config.mutation_probability = min(config.mutation_probability + 0.1, 1)
+
         ### NEXT GENERATION ###
         # produce next generation
         # copy the fittest Organisms to the new population "they survive"
@@ -69,12 +72,12 @@ def main():
         # otherwise go to 3 and repeat
 
     the_winner = my_population.fittest_organism()
+    computation_time = time.time()-t0
     if config.verbose:
         print(the_winner)
         print(
-            f'Number of Iterations:{iterations}\nTotal Time: {time.time()-t0}\nAverage Fitness of final Population: {my_population.compute_average_fitness()}')
-    else:
-        return iterations, time.time() - t0, the_winner.fitness, my_population.compute_average_fitness()
+            f'Number of Iterations:{iterations}\nTotal Time: {computation_time}\nAverage Fitness of final Population: {my_population.compute_average_fitness()}')
+    return iterations, computation_time, the_winner.fitness, my_population.compute_average_fitness()
 
 
 if __name__ == '__main__':
