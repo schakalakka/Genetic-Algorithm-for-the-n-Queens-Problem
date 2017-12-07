@@ -146,7 +146,7 @@ class Population:
         elif method is 'tournament':
             return self.tournament_selection(kwargs.get('competitors', config.tournament_competitors))
         elif method is 'random':
-            methods_without_random = ['roulette', 'truncation', 'tournament']
+            methods_without_random = config.selection_method_list
             return self.select_parent(method=methods_without_random[np.random.randint(0, len(methods_without_random))])
 
     def roulette_wheel_selection(self) -> Organism:

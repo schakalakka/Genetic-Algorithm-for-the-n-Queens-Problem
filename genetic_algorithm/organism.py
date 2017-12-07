@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Tuple
+import sys
 
 from genetic_algorithm import config
 
@@ -12,6 +13,9 @@ class Organism:
         A given np.ndarray of the form [1,2,4,3,0,5]
         A given list of tuples of the form [1,2,4,3,0,5]
         or if genotype=None one Organism is generated randomly
+        There can only be one queen per row and column!
+        Per row is guaranteed because the index determines the row.
+        Per column is guaranteed with np.unique, i.e. each element (column) does only occur once.
         :param genotype: np.ndarray, list or None
         """
         if genotype is None:
@@ -19,9 +23,17 @@ class Organism:
             self.genotype = np.arange(config.field_size)
             np.random.shuffle(self.genotype)
         elif type(genotype) is np.ndarray:
-            self.genotype = genotype
+            if len(genotype) == len(np.unique(genotype)):
+                self.genotype = genotype
+            else:
+                print('There are several queens per column! Exit.')
+                sys.exit(1)
         elif type(genotype) is list:
-            self.genotype = np.array(genotype)
+            if len(genotype) == len(np.unique(genotype)):
+                self.genotype = np.array(genotype)
+            else:
+                print('There are several queens per column! Exit.')
+                sys.exit(1)
         else:
             print('Type of genotype is not correct. Either specify np.ndarray, list or None.')
         self.fitness = 0
@@ -76,7 +88,7 @@ class Organism:
         If a random value is higher than the crossover probability the parents will be returned without any crossover
         :param self: Organism, parent1
         :param parent2: Organism
-        :param method: str, can be 'random', 'uniform', 'pmx' or 'one_point'
+        :param method: str, can be 'random', 'order_bases', 'pmx'
         :return: two children
         """
         # if random value is higher than crossover probability no children will be produced
@@ -86,14 +98,12 @@ class Organism:
         else:
             # if method is None use the default crossover method
             method = method if method else config.crossover_method
-            if method is 'one_point':
-                return self.one_point_crossover(parent2)
-            elif method is 'uniform':
-                return self.uniform_crossover(parent2)
+            if method is 'order_based':
+                return self.order_based_crossover(parent2)
             elif method is 'pmx':
                 return self.pmx_crossover(parent2)
             elif method is 'random':
-                method_list = ['uniform', 'one_point', 'pmx']
+                method_list = config.crossover_method_list
                 return self.crossover(parent2, method=method_list[np.random.randint(0, len(method_list))])
 
     def pmx_crossover(self, parent2) -> Tuple:
@@ -129,7 +139,7 @@ class Organism:
         for ind1, x in enumerate(self.genotype[cxpoint1:cxpoint2]):
             ind1 += cxpoint1
             if x not in child2_genotype:
-                while child2_genotype[ind1] != None:
+                while child2_genotype[ind1] is not None:
                     try:
                         ind1 = list(self.genotype).index([parent2.genotype[ind1]])
                     except:
@@ -138,11 +148,11 @@ class Organism:
 
         # Copy over the rest from the second parent
         for ind, x in enumerate(child1_genotype):
-            if x == None:
+            if x is None:
                 child1_genotype[ind] = parent2.genotype[ind]
 
         for ind1, x in enumerate(child2_genotype):
-            if x == None:
+            if x is None:
                 child2_genotype[ind1] = self.genotype[ind1]
 
         # create organisms and compute fitness
@@ -150,46 +160,67 @@ class Organism:
         child2 = Organism(child2_genotype)
         return child1, child2
 
-    def one_point_crossover(self, parent2) -> Tuple:
+    def order_based_crossover(self, parent2) -> Tuple:
         """
-        Computes a one point crossover (for a random point) and produces two children
-        :param self: Organism, "parent1"
+        Order-based Crossover:
+        We take random number of points from a parent genotype.
+        The order of these points is kept and applied on the second parent.
+        The remaining genotype elements are taken from the second parent.
+        For the second child reverse the order of the parents.
+        Example:  points = [1,2,5]
+                  parent1.genotype = [2,5,0,3,6,1,4,7]
+                  order_args_1 = [5,0,1]
+                  parent2.genotype = [3,4,0,7,2,5,1,6]
+                  order_args_2 = [4,0,5]
+                  child1 = [3,4,None,7,2,None,None,6]
+                  child2 = [2,None,None,3,6,1,None,7]
+                  order_indices_1 = [2,5,6]
+                  order_indices_2 = [1,2,6]
+
+                  child1 = [3,4,5,7,2,0,1,6]
+                  child2 = [2,4,0,3,6,1,5,7]
+
         :param parent2: Organism
-        :return: two children/Organisms
+        :return: Two children/Organisms
         """
-        crossover_point = np.random.randint(1, config.field_size)
-        child1_genotype = np.concatenate(
-            (self.genotype[:crossover_point], parent2.genotype[crossover_point:]), axis=0)
-        child2_genotype = np.concatenate(
-            (parent2.genotype[:crossover_point], self.genotype[crossover_point:]), axis=0)
-        child1 = Organism(child1_genotype)
-        child2 = Organism(child2_genotype)
-        return child1, child2
+        # determine randomly how many points are chosen
+        number_of_points_to_choose = np.random.randint(1, config.field_size)
+        # choose the specific points
+        # create an array like [0,1,2,3,...,n]
+        points = np.arange(0, config.field_size)
+        # shuffle it randomly
+        np.random.shuffle(points)
+        # cut it to get only the first part
+        points = points[0:number_of_points_to_choose]
+        # sort
+        points.sort()
 
-    def uniform_crossover(self, parent2) -> Tuple:
-        """
-        Computes a uniform crossover and produces two children
-        :param self: Organism, parent1
-        :param parent2: Organism
-        :return: two children
-        """
-        # generate a series of length config.fieldsize of 0s and 1s
-        coinflips = np.random.randint(0, 1, config.field_size)
+        # Example:  points = [1,2,5]
+        #           parent1.genotype = [2,5,0,3,6,1,4,7]
+        #           order_args_1 = [5,0,1]
+        #           parent2.genotype = [3,4,0,7,2,5,1,6]
+        #           order_args_2 = [4,0,5]
 
-        # filter the indexes for which the coinflip is 0 or 1 respectively
-        indexes_with_0 = [i for i, coinflip in enumerate(coinflips) if coinflip == 0]
-        indexes_with_1 = [i for i, coinflip in enumerate(coinflips) if coinflip == 1]
+        order_args_1 = self.genotype[points]
+        order_args_2 = parent2.genotype[points]
 
-        # compute genotype crossover
-        # for child1 take the chromosomes from parent 1 if coinflip is 0
-        # and from parent 2 if coinflip is 1
-        # for child 2 vice versa
-        child1_genotype = np.concatenate((self.genotype[indexes_with_0], parent2.genotype[indexes_with_1]), axis=0)
-        child2_genotype = np.concatenate((self.genotype[indexes_with_1], parent2.genotype[indexes_with_0]), axis=0)
+        # copy the parents genotype to the children as a 'base'
+        child1 = parent2.genotype.copy()
+        child2 = self.genotype.copy()
 
-        # create organisms and compoute fitness
-        child1 = Organism(child1_genotype)
-        child2 = Organism(child2_genotype)
+        # get the indices of the order points
+        # Example:  order_indices_1 = [2,5,6]
+        #           order_indices_2 = [1,2,6]
+        order_indices_1 = np.where(np.isin(parent2.genotype, order_args_1))
+        order_indices_2 = np.where(np.isin(self.genotype, order_args_2))
+
+        # apply the order on the points
+        child1[order_indices_1] = order_args_1
+        child2[order_indices_2] = order_args_2
+
+        # create organisms and compute fitness
+        child1 = Organism(child1)
+        child2 = Organism(child2)
         return child1, child2
 
     ####################################################################################################################
@@ -225,8 +256,7 @@ class Organism:
         elif method is 'displacement_inversion':
             self.displacement_inversion_mutation()
         elif method is 'random':
-            method_list = ['exchange', 'scramble', 'displacement', 'insertion', 'inversion',
-                           'displacement_inversion']
+            method_list = config.mutation_method_list
             self.mutate(method=method_list[np.random.randint(0, len(method_list))])
 
     def exchange_mutation(self):

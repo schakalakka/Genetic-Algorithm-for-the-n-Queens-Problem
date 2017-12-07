@@ -30,7 +30,7 @@ for config.field_size in field_sizes:
     print(f'Field Sizes: {config.field_size}')
     for config.number_of_organisms in number_of_organisms:
         print(f'Population Size: {config.number_of_organisms}')
-        for config.parent_selection_method in selection_methods:
+        for config.selection_method in selection_methods:
             for config.copy_threshold in copy_thresholds:
                 for config.crossover_method in crossover_methods:
                     for config.tournament_competitors in tournament_competitors:
@@ -46,7 +46,7 @@ for config.field_size in field_sizes:
                                                 iterations, time, fitness, average_fitness = main()
                                                 current_row['field_size'] = config.field_size
                                                 current_row['population_size'] = config.number_of_organisms
-                                                current_row['selection_method'] = config.parent_selection_method
+                                                current_row['selection_method'] = config.selection_method
                                                 current_row['tournament_competitors'] = config.tournament_competitors
                                                 current_row['truncation_threshold'] = config.truncation_threshold
                                                 current_row['copy_threshold'] = config.copy_threshold

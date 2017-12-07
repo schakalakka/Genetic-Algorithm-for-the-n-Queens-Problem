@@ -42,8 +42,8 @@ def main():
             ### SELECTION ###
             # selecting two organisms from old generation for mating
             # choose fitter ones, maybe not THE fittest
-            parent1 = my_population.select_parent(method=config.parent_selection_method)
-            parent2 = my_population.select_parent(method=config.parent_selection_method)
+            parent1 = my_population.select_parent(method=config.selection_method)
+            parent2 = my_population.select_parent(method=config.selection_method)
 
             ### CROSSOVER ###
             # recombine genetic material with probability p_c, i.e. crossover
