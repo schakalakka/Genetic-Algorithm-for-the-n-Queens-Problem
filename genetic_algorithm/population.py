@@ -129,7 +129,6 @@ class Population:
         """
         Switch function for choosing the selection method for parents
         Possible methods:
-        'fast': fast random distribution method, fitter individuals are more likely to be chosen
         'truncation': truncate the population and choose randomly from the fittest x percent
         'tournament': choose several competitors/Organisms for a tournament and choose the fittest
         'roulette': choose randomly with a higher probabilty for fitter individuals
@@ -137,9 +136,7 @@ class Population:
         :param method: 'random', 'fast', 'tournament', 'truncation', 'roulette'
         :return:
         """
-        if method is 'fast':
-            return self.choose_parents_fast()
-        elif method is 'roulette':
+        if method is 'roulette':
             return self.roulette_wheel_selection()
         elif method is 'truncation':
             return self.truncation_selection(kwargs.get('truncation_threshold', config.truncation_threshold))
@@ -163,17 +160,6 @@ class Population:
         a, b = np.random.randint(0, self.accumulated_fitness_values[-1], 2)
         parent = self.population[
             next(i for i, acc_fitness in enumerate(self.accumulated_fitness_values) if acc_fitness >= a)]
-        return parent
-
-    def choose_parents_fast(self) -> Organism:
-        """
-        Chooses parents via a set random distribution
-        The distribution so far is a uniform distribution on [0,1] potentiated by 4 (i.e. smaller values are
-        more likely!!) and then multiplied by the population size.
-        TODO find a better distribution!
-        :return:
-        """
-        parent = self.population[int(np.random.uniform() ** 4 * config.number_of_organisms)]
         return parent
 
     def truncation_selection(self, truncation_threshold=0.5) -> Organism:
