@@ -100,6 +100,8 @@ class Organism:
             method = method if method else config.crossover_method
             if method is 'order_based':
                 return self.order_based_crossover(parent2)
+            elif method is 'position_based':
+                return self.position_based_crossover(parent2)
             elif method is 'pmx':
                 return self.pmx_crossover(parent2)
             elif method is 'random':
@@ -174,8 +176,8 @@ class Organism:
                   order_args_2 = [4,0,5]
                   child1 = [3,4,None,7,2,None,None,6]
                   child2 = [2,None,None,3,6,1,None,7]
-                  order_indices_1 = [2,5,6]
-                  order_indices_2 = [1,2,6]
+                  order_indices_1 = [2,5,6] -- indices of the order args in the other parent
+                  order_indices_2 = [1,2,6] -- indices of the order args in the other parent
 
                   child1 = [3,4,5,7,2,0,1,6]
                   child2 = [2,4,0,3,6,1,5,7]
@@ -217,6 +219,81 @@ class Organism:
         # apply the order on the points
         child1[order_indices_1] = order_args_1
         child2[order_indices_2] = order_args_2
+
+        # create organisms and compute fitness
+        child1 = Organism(child1)
+        child2 = Organism(child2)
+        return child1, child2
+
+    def position_based_crossover(self, parent2) -> Tuple:
+        """
+        Position based Crossover:
+        We take random number of points from a parent genotype.
+        The position of these points is kept and applied on the child.
+        The remaining genotype elements of the second parent are inserted sequentially to fill up the missing
+        points of the child.
+        For the second child reverse the order of the parents.
+        Example:    points = [1,2,5]
+                    points_minus_index = [1,1,3]
+                    parent1.genotype = [2,5,0,3,6,1,4,7]
+                    parent2.genotype = [3,4,0,7,2,5,1,6]
+                    position_args_1 = [5,0,1]
+                    position_args_2 = [4,0,5]
+                    position_indices_1 = [2,5,6] -- indices of the position args in the other parent
+                    position_indices_2 = [1,2,6] -- indices of the position args in the other parent
+
+                    after deletion of points
+                    child1 = [3,4,7,2,6]
+                    child2 = [2,3,6,1,7]
+
+                    after insertion of position_args
+                    child1 = [3,5,0,4,7,1,2,6]
+                    child2 = [2,4,0,3,6,5,1,7]
+
+        :param parent2: Organism
+        :return: two children/Organisms
+        """
+        # determine randomly how many points are chosen
+        number_of_points_to_choose = np.random.randint(1, config.field_size)
+        # choose the specific points
+        # create an array like [0,1,2,3,...,n]
+        points = np.arange(0, config.field_size)
+        # shuffle it randomly
+        np.random.shuffle(points)
+        # cut it to get only the first part
+        points = points[0:number_of_points_to_choose]
+        # sort
+        points.sort()
+        points_minus_index = [x - i for i, x in enumerate(points)]
+
+        # Example:  points = [1,2,5]
+        #           points_minus_index = [1,1,3]
+        #           parent1.genotype = [2,5,0,3,6,1,4,7]
+        #           position_args_1 = [5,0,1]
+        #           parent2.genotype = [3,4,0,7,2,5,1,6]
+        #           position_args_2 = [4,0,5]
+
+        child1 = parent2.genotype.copy()
+        child2 = self.genotype.copy()
+
+        position_args_1 = self.genotype[points]
+        position_args_2 = parent2.genotype[points]
+
+        # get the indices of the position points
+        # Example:  position_indices_1 = [2,5,6]
+        #           position_indices_2 = [1,2,6]
+        position_indices_1 = np.where(np.isin(parent2.genotype, position_args_1))
+        position_indices_2 = np.where(np.isin(self.genotype, position_args_2))
+
+        # delete the elements which will be inserted from the other elements
+        # to avoid duplicates
+        child1 = np.delete(child1, [position_indices_1])
+        child2 = np.delete(child2, [position_indices_2])
+
+        # insert the elements to its respective position according to points or points_minus_index
+        # we have to use points_minus_index because np.inserts uses the given array throughout the insertion
+        child1 = np.insert(child1, points_minus_index, position_args_1)
+        child2 = np.insert(child2, points_minus_index, position_args_2)
 
         # create organisms and compute fitness
         child1 = Organism(child1)
