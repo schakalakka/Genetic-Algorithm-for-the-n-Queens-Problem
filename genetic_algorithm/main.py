@@ -28,8 +28,8 @@ def main():
 
         # if adapt mutability is set to True it will increase the mutation_probability each 1000 iterations
         # by 10%
-        if iterations % 1000 == 0 and config.adapt_mutability:
-            config.mutation_probability = min(config.mutation_probability + 0.1, 1)
+        if iterations % 500 == 0 and config.adapt_mutability:
+            config.mutation_probability = min(config.mutation_probability + 0.05, 1)
 
         ### NEXT GENERATION ###
         # produce next generation

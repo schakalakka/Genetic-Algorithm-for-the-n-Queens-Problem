@@ -1,0 +1,11 @@
+field_size|population_size|selection_method|tournament_competitors|truncation_threshold|copy_threshold|crossover_method|crossover_probability|mutation_method|mutation_probability|adapt_mutability|iterations|time|fitness|average_fitness
+40|100|truncation|5|0.5|0.1|pmx|0.8|exchange|0.3|True|166|7.251468181610107|780.0|778.33
+40|100|truncation|5|0.5|0.1|pmx|0.8|exchange|0.3|True|70|4.424951791763306|780.0|778.43
+40|100|truncation|5|0.5|0.1|pmx|0.8|exchange|0.3|True|279|15.327763557434082|780.0|778.21
+40|100|truncation|5|0.5|0.1|pmx|0.8|exchange|0.3|True|54|2.929022789001465|780.0|778.34
+40|100|truncation|5|0.5|0.1|pmx|0.8|exchange|0.3|True|141|6.6232500076293945|780.0|778.33
+40|100|truncation|5|0.5|0.1|pmx|0.8|exchange|0.3|True|92|4.196064472198486|780.0|778.07
+40|100|truncation|5|0.5|0.1|pmx|0.8|exchange|0.3|True|225|9.431260108947754|780.0|778.31
+40|100|truncation|5|0.5|0.1|pmx|0.8|exchange|0.3|True|51|2.7747697830200195|780.0|777.53
+40|100|truncation|5|0.5|0.1|pmx|0.8|exchange|0.3|True|184|10.211774349212646|780.0|778.14
+40|100|truncation|5|0.5|0.1|pmx|0.8|exchange|0.3|True|124|6.131410837173462|780.0|778.31

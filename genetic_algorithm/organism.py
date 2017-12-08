@@ -10,9 +10,9 @@ class Organism:
     def __init__(self, genotype=None):
         """
         Creates an Organism from either
-        A given np.ndarray of the form [1,2,4,3,0,5]
-        A given list of tuples of the form [1,2,4,3,0,5]
-        or if genotype=None one Organism is generated randomly
+            A given np.ndarray of the form [1,2,4,3,0,5]
+            A given list of tuples of the form [1,2,4,3,0,5]
+            or if genotype=None one Organism is generated randomly
         There can only be one queen per row and column!
         Per row is guaranteed because the index determines the row.
         Per column is guaranteed with np.unique, i.e. each element (column) does only occur once.
@@ -56,7 +56,7 @@ class Organism:
         """
         Computes and sets(!) the fitness for an Organism
         In particular count the number of times a queen collides with another queen and
-        subtract this number from n*(n+1)/2 (the maximal number of collisions)
+        subtract this number from n*(n-1)/2 (the maximal number of collisions)
 
         :return:
         """
@@ -134,7 +134,7 @@ class Organism:
         for ind, x in enumerate(parent2.genotype[cxpoint1:cxpoint2]):
             ind += cxpoint1
             if x not in child1_genotype:
-                while child1_genotype[ind] != None:
+                while child1_genotype[ind] is not None:
                     ind = list(parent2.genotype).index([self.genotype[ind]])
                 child1_genotype[ind] = x
 

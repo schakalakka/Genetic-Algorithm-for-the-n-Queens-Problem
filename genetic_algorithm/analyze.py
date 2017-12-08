@@ -1,3 +1,9 @@
+#######################
+#
+#   This script is only used for plotting
+#
+#######################
+
 import csv
 import pygal
 import sys
@@ -12,6 +18,7 @@ def plot(n, key, my_type):
         runs = 500
     else:
         runs = 100
+
     if key == 'time':
         y_title = 'Average Running Time in Seconds'
     else:
@@ -48,14 +55,21 @@ def plot(n, key, my_type):
     truncation08 = sum([float(x[key]) for i, x in enumerate(my_list) if x['truncation_threshold'] == '0.8']) / runs
     truncation09 = sum([float(x[key]) for i, x in enumerate(my_list) if x['truncation_threshold'] == '0.9']) / runs
 
-    tournament3 =  sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '3']) / runs
-    tournament5 =  sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '5']) / runs
+    tournament3 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '3']) / runs
+    tournament5 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '5']) / runs
     tournament10 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '10']) / runs
     tournament15 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '15']) / runs
     tournament20 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '20']) / runs
     tournament25 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '25']) / runs
     tournament30 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '30']) / runs
     tournament40 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '40']) / runs
+
+    if my_type == 'Size' and n <= 30:
+        runs = 40
+    elif my_type == 'Size' and n > 30:
+        runs = 10
+    size_roulette = sum([float(x[key]) for i, x in enumerate(my_list) if x['selection_method'] == 'roulette']) / runs
+    size_truncation = sum([float(x[key]) for i, x in enumerate(my_list) if x['selection_method'] == 'truncation']) / runs
 
     # mutation
     random_mutation = sum([float(x[key]) for i, x in enumerate(my_list) if x['mutation_method'] == 'random']) / runs
@@ -87,12 +101,24 @@ def plot(n, key, my_type):
         my_chart = pygal.Bar(show_legend=False, y_title=y_title)
         my_chart.title = f'{my_type} Thresholds for the {n}-Queens Problem'
         my_chart.x_labels = ['0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9']
-        my_chart.add('Truncation Threshold', [truncation01, truncation02, truncation03, truncation04, truncation05, truncation06, truncation07, truncation08, truncation09])
+        my_chart.add('Truncation Threshold',
+                     [truncation01, truncation02, truncation03, truncation04, truncation05, truncation06, truncation07,
+                      truncation08, truncation09])
     elif my_type == 'Tournament':
         my_chart = pygal.Bar(show_legend=False, y_title=y_title)
         my_chart.title = f'{my_type} Competitors for the {n}-Queens Problem'
         my_chart.x_labels = [3, 5, 10, 15, 20, 25, 30, 40]
-        my_chart.add('Tournament Competitors', [tournament3, tournament5, tournament10, tournament15, tournament20, tournament25, tournament30, tournament40])
+        my_chart.add('Tournament Competitors',
+                     [tournament3, tournament5, tournament10, tournament15, tournament20, tournament25, tournament30,
+                      tournament40])
+    elif my_type == 'Size':
+        if n> 30:
+            return size_truncation
+        my_chart = pygal.Bar(show_legend=True, legend_at_bottom=True, y_title=y_title)
+        my_chart.title = f'Roulette vs Truncation'
+        my_chart.x_labels = ['Tournament', 'Roulette']
+        # return [size_roulette, size_roulette_adaptfalse, size_truncation, size_truncation_adaptfalse]
+        my_chart.add(f'', [size_truncation, size_roulette])
     else:
         print('ERROR!')
         sys.exit(1)
@@ -102,7 +128,14 @@ def plot(n, key, my_type):
     # my_chart.render_in_browser()
 
 
-for n in [8,15]:
-    for key in ['time', 'iterations']:
-        for my_type in ['Truncation', 'Tournament']:
-            plot(n, key, my_type)
+my_chart = pygal.Bar(show_legend=False, x_label_rotation=0, y_title='Average Running Time in Seconds')
+my_chart.title = f'Computational Growth'
+my_chart.x_labels = [40, 50, 60, 70, 80, 90, 100]
+foo = []
+for n in [40, 50, 60, 70, 80, 90, 100]:
+    for key in ['time']:
+        for my_type in ['Size']:
+            foo.append(plot(n, key, my_type))
+
+my_chart.add(f'', foo)
+my_chart.render_to_png(f'images/size_time.png')

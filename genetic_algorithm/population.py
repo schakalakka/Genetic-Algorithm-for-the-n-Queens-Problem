@@ -116,7 +116,7 @@ class Population:
         Convenience function for computing two children via crossover
         :param parent1: Organism
         :param parent2: Organism
-        :param method: 'one_point', 'uniform' or 'random'
+        :param method: 'pmx', 'order_based', 'position_based' or 'random'
         :return: two children
         """
         return parent1.crossover(parent2, method=method)
@@ -129,12 +129,15 @@ class Population:
         """
         Switch function for choosing the selection method for parents
         Possible methods:
-        'truncation': truncate the population and choose randomly from the fittest x percent
-        'tournament': choose several competitors/Organisms for a tournament and choose the fittest
-        'roulette': choose randomly with a higher probabilty for fitter individuals
+        'truncation': truncate the population and choose randomly from the fittest x percent,
+                        takes additional argument 'truncation_threshold'
+        'tournament': choose several competitors/Organisms for a tournament and take the fittest one,
+                        takes an additional argument 'competitors' determining the amount of
+                        competitors in the tournament
+        'roulette': choose randomly with a higher probability for fitter individuals according to their fitness values
         'random': randomly choose one from the methods above
-        :param method: 'random', 'fast', 'tournament', 'truncation', 'roulette'
-        :return:
+        :param method: 'random', 'tournament', 'truncation', 'roulette'
+        :return: parent/Organism
         """
         if method is 'roulette':
             return self.roulette_wheel_selection()
@@ -149,7 +152,8 @@ class Population:
     def roulette_wheel_selection(self) -> Organism:
         """
         Roulette Wheel Selection
-        Choose parent for crossover. It will choose fitter individuals with a higher probability
+        Choose parent for crossover. It will choose fitter individuals with a higher probability by computing
+        the accumulated fitnesses.
         :return: two parents/Organisms
         """
         # compute accumulated fitnesses if not already done
@@ -167,7 +171,7 @@ class Population:
         Truncation Selection:
         Selects an Organism randomly from the best x% of the population.
         If the truncation_threshold is 0.5 then only the best 50% Organisms are considered.
-        Too low truncation_threshold values are too elitist
+        Too low truncation_threshold values are more elitist
         :param truncation_threshold: between 0 and 1, typically between 0.5 and 0.1
         :return: Organism
         """
@@ -176,7 +180,8 @@ class Population:
     def tournament_selection(self, competitors=10) -> Organism:
         """
         Tournament selection:
-        Select a number of Organisms from a population and return the fittest one
+        Select a number of Organisms from a population for a tournament
+        and return the fittest one
         :param competitors: Number of randomly chosen Organisms for the tournament
         :return: Organism
         """
