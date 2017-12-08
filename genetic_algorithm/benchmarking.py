@@ -9,17 +9,17 @@ field_sizes = [15]
 number_of_organisms = [100]  # [50, 100, 200, 500]
 
 # SELECTION
-selection_methods = ['random', 'tournament', 'truncation', 'roulette']
-truncation_thresholds = [0.5]  # np.linspace(0.1, 0.9, 9)
-tournament_competitors = [20]  # [3, 5, 10, 15, 20, 25, 30, 40]
+selection_methods = ['tournament']#['random', 'tournament', 'truncation', 'roulette']
+truncation_thresholds = [0.5] #np.linspace(0.1, 0.9, 9)
+tournament_competitors = [3, 5, 10, 15, 20, 25, 30, 40]
 copy_thresholds = [0.1]  # [0, 0.1, 0.2, 0.3]
 
 # CROSSOVER
-crossover_methods = ['random']#, 'pmx', 'position_based', 'order_based']
+crossover_methods = ['pmx']#, 'pmx', 'position_based', 'order_based']
 crossover_probabilities = [0.8]  # [0.6, 0.7, 0.8, 0.9, 1]
 
 # MUTATION
-mutation_methods =['random']#, 'exchange', 'scramble', 'displacement', 'insertion', 'inversion','displacement_inversion']
+mutation_methods =['exchange']#, 'exchange', 'scramble', 'displacement', 'insertion', 'inversion','displacement_inversion']
 mutation_probabilities = [0.3]  # [0.001, 0.01, 0.1, 0.2, 0.3]
 adapt_mutabilities = [False]  # [False, True]
 
@@ -59,7 +59,7 @@ for config.field_size in field_sizes:
                                                 current_row['fitness'] = fitness
                                                 current_row['average_fitness'] = average_fitness
                                                 benchmark_list.append(current_row)
-    with open(f'benchmark_{config.field_size}_selection.csv', 'w') as f:
+    with open(f'csv/benchmark_{config.field_size}_tournament.csv', 'w') as f:
         csv_f = csv.DictWriter(f, delimiter='|', fieldnames=benchmark_list[0].keys())
         csv_f.writeheader()
         csv_f.writerows(benchmark_list)

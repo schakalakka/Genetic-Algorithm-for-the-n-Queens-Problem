@@ -2,12 +2,12 @@ import csv
 import pygal
 import sys
 
-n = 15
+n = 8
 key = 'time'
-my_type = 'Crossover'
+my_type = 'Tournament'
 
 
-def plot(n, key, mytype):
+def plot(n, key, my_type):
     if n == 8:
         runs = 500
     else:
@@ -17,7 +17,7 @@ def plot(n, key, mytype):
     else:
         y_title = 'Average Number of Iterations'
 
-    with open(f'benchmark_{n}_{my_type.lower()}.csv', 'r') as f:
+    with open(f'csv/benchmark_{n}_{my_type.lower()}.csv', 'r') as f:
         csv_f = csv.DictReader(f, delimiter='|')
         my_list = []
         for row in csv_f:
@@ -38,24 +38,24 @@ def plot(n, key, mytype):
     tournament = sum([float(x[key]) for i, x in enumerate(my_list) if x['selection_method'] == 'tournament']) / runs
     truncation = sum([float(x[key]) for i, x in enumerate(my_list) if x['selection_method'] == 'truncation']) / runs
 
-    # truncation01 = sum([i for i, x in enumerate(new_list) if x['truncation_threshold'] == '0.1'])
-    # truncation02 = sum([i for i, x in enumerate(new_list) if x['truncation_threshold'] == '0.2'])
-    # truncation03 = sum([i for i, x in enumerate(new_list) if x['truncation_threshold'] == '0.3'])
-    # truncation04 = sum([i for i, x in enumerate(new_list) if x['truncation_threshold'] == '0.4'])
-    # truncation05 = sum([i for i, x in enumerate(new_list) if x['truncation_threshold'] == '0.5'])
-    # truncation06 = sum([i for i, x in enumerate(new_list) if x['truncation_threshold'] == '0.6'])
-    # truncation07 = sum([i for i, x in enumerate(new_list) if x['truncation_threshold'] == '0.7'])
-    # truncation08 = sum([i for i, x in enumerate(new_list) if x['truncation_threshold'] == '0.8'])
-    # truncation09 = sum([i for i, x in enumerate(new_list) if x['truncation_threshold'] == '0.9'])
+    truncation01 = sum([float(x[key]) for i, x in enumerate(my_list) if x['truncation_threshold'] == '0.1']) / runs
+    truncation02 = sum([float(x[key]) for i, x in enumerate(my_list) if x['truncation_threshold'] == '0.2']) / runs
+    truncation03 = sum([float(x[key]) for i, x in enumerate(my_list) if x['truncation_threshold'] == '0.3']) / runs
+    truncation04 = sum([float(x[key]) for i, x in enumerate(my_list) if x['truncation_threshold'] == '0.4']) / runs
+    truncation05 = sum([float(x[key]) for i, x in enumerate(my_list) if x['truncation_threshold'] == '0.5']) / runs
+    truncation06 = sum([float(x[key]) for i, x in enumerate(my_list) if x['truncation_threshold'] == '0.6']) / runs
+    truncation07 = sum([float(x[key]) for i, x in enumerate(my_list) if x['truncation_threshold'] == '0.7']) / runs
+    truncation08 = sum([float(x[key]) for i, x in enumerate(my_list) if x['truncation_threshold'] == '0.8']) / runs
+    truncation09 = sum([float(x[key]) for i, x in enumerate(my_list) if x['truncation_threshold'] == '0.9']) / runs
 
-    # tournament3 = sum([i for i, x in enumerate(new_list) if x['tournament_competitors'] == '3'])
-    # tournament5 = sum([i for i, x in enumerate(new_list) if x['tournament_competitors'] == '5'])
-    # tournament10 = sum([i for i, x in enumerate(new_list) if x['tournament_competitors'] == '10'])
-    # tournament15 = sum([i for i, x in enumerate(new_list) if x['tournament_competitors'] == '15'])
-    # tournament20 = sum([i for i, x in enumerate(new_list) if x['tournament_competitors'] == '20'])
-    # tournament25 = sum([i for i, x in enumerate(new_list) if x['tournament_competitors'] == '25'])
-    # tournament30 = sum([i for i, x in enumerate(new_list) if x['tournament_competitors'] == '30'])
-    # tournament40 = sum([i for i, x in enumerate(new_list) if x['tournament_competitors'] == '40'])
+    tournament3 =  sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '3']) / runs
+    tournament5 =  sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '5']) / runs
+    tournament10 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '10']) / runs
+    tournament15 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '15']) / runs
+    tournament20 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '20']) / runs
+    tournament25 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '25']) / runs
+    tournament30 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '30']) / runs
+    tournament40 = sum([float(x[key]) for i, x in enumerate(my_list) if x['tournament_competitors'] == '40']) / runs
 
     # mutation
     random_mutation = sum([float(x[key]) for i, x in enumerate(my_list) if x['mutation_method'] == 'random']) / runs
@@ -83,16 +83,26 @@ def plot(n, key, mytype):
     elif my_type == 'Selection':
         my_chart.x_labels = ['random', 'tournament', 'truncation', 'roulette']
         my_chart.add('Selection Method', [random_selection, tournament, truncation, roulette])
+    elif my_type == 'Truncation':
+        my_chart = pygal.Bar(show_legend=False, y_title=y_title)
+        my_chart.title = f'{my_type} Thresholds for the {n}-Queens Problem'
+        my_chart.x_labels = ['0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9']
+        my_chart.add('Truncation Threshold', [truncation01, truncation02, truncation03, truncation04, truncation05, truncation06, truncation07, truncation08, truncation09])
+    elif my_type == 'Tournament':
+        my_chart = pygal.Bar(show_legend=False, y_title=y_title)
+        my_chart.title = f'{my_type} Competitors for the {n}-Queens Problem'
+        my_chart.x_labels = [3, 5, 10, 15, 20, 25, 30, 40]
+        my_chart.add('Tournament Competitors', [tournament3, tournament5, tournament10, tournament15, tournament20, tournament25, tournament30, tournament40])
     else:
         print('ERROR!')
         sys.exit(1)
 
-    my_chart.render_to_file(f'images/{my_type.lower()}_{n}_{key}.svg')
+    # my_chart.render_to_file(f'images/{my_type.lower()}_{n}_{key}.svg')
     my_chart.render_to_png(f'images/{my_type.lower()}_{n}_{key}.png')
     # my_chart.render_in_browser()
 
 
-for n in [8, 15]:
+for n in [8,15]:
     for key in ['time', 'iterations']:
-        for my_type in ['Crossover', 'Mutation', 'Selection']:
+        for my_type in ['Truncation', 'Tournament']:
             plot(n, key, my_type)

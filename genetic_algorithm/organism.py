@@ -46,10 +46,10 @@ class Organism:
         """
         repr = [f'Fitness: {self.fitness}']
         repr.append(f'Genotype: {self.genotype}')
-        repr.append((config.field_size * 2 + 1) * '-')
+        # repr.append((config.field_size * 2 + 1) * '-')
         for i in self.genotype:
             repr.append('|' + i * ' |' + 'Q|' + (config.field_size - i - 1) * ' |')
-            repr.append((config.field_size * 2 + 1) * '-')
+            # repr.append((config.field_size * 2 + 1) * '-')
         return '\n'.join(repr)
 
     def compute_fitness(self):
