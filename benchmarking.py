@@ -6,8 +6,8 @@
 
 import csv
 
-from genetic_algorithm import config
-from genetic_algorithm.main import main
+import config
+from main import main
 
 runs = 10
 field_sizes = [40]

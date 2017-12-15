@@ -1,8 +1,8 @@
 from typing import Tuple
 import numpy as np
 
-from genetic_algorithm.organism import Organism
-from genetic_algorithm import config
+from organism import Organism
+import config
 
 
 class Population:

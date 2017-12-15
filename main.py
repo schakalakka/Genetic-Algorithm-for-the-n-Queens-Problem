@@ -1,8 +1,8 @@
 import numpy as np
 import time
 
-from genetic_algorithm.population import Population
-from genetic_algorithm import config
+from population import Population
+import config
 
 
 def main():

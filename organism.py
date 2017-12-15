@@ -2,7 +2,7 @@ import numpy as np
 from typing import Tuple
 import sys
 
-from genetic_algorithm import config
+import config
 
 
 class Organism:
